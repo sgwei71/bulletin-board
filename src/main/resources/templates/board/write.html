@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판 - <span th:text="${isEdit} ? '수정' : '작성'"></span></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .container-main {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .page-title {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .form-control, .form-control-textarea {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .form-control:focus, .form-control-textarea:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+        }
+        .form-control-textarea {
+            resize: vertical;
+            min-height: 300px;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .form-group.error .form-control,
+        .form-group.error .form-control-textarea {
+            border-color: #dc3545;
+        }
+        .button-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        .button-group button,
+        .button-group a {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="container-main">
+        <!-- 페이지 제목 -->
+        <h1 class="page-title" th:text="${isEdit} ? '게시물 수정' : '게시물 작성'"></h1>
+
+        <!-- 폼 -->
+        <form th:action="${isEdit} ? @{/board/{id}/edit(id=${board.boardId})} : @{/board/write}"
+              method="post" th:object="${board}" novalidate>
+
+            <!-- 제목 필드 -->
+            <div class="form-group" th:classappend="${#fields.hasErrors('title')} ? 'error'">
+                <label for="title" class="form-label">제목 <span style="color: red;">*</span></label>
+                <input type="text" class="form-control" id="title" th:field="*{title}"
+                       placeholder="게시물의 제목을 입력하세요" maxlength="200">
+                <div class="error-message" th:if="${#fields.hasErrors('title')}">
+                    <span th:errors="*{title}"></span>
+                </div>
+            </div>
+
+            <!-- 작성자 필드 -->
+            <div class="form-group" th:classappend="${#fields.hasErrors('author')} ? 'error'">
+                <label for="author" class="form-label">작성자 <span style="color: red;">*</span></label>
+                <input type="text" class="form-control" id="author" th:field="*{author}"
+                       placeholder="작성자 이름을 입력하세요" maxlength="50">
+                <div class="error-message" th:if="${#fields.hasErrors('author')}">
+                    <span th:errors="*{author}"></span>
+                </div>
+            </div>
+
+            <!-- 내용 필드 -->
+            <div class="form-group" th:classappend="${#fields.hasErrors('content')} ? 'error'">
+                <label for="content" class="form-label">내용 <span style="color: red;">*</span></label>
+                <textarea class="form-control-textarea form-control" id="content" th:field="*{content}"
+                          placeholder="게시물의 내용을 입력하세요"></textarea>
+                <div class="error-message" th:if="${#fields.hasErrors('content')}">
+                    <span th:errors="*{content}"></span>
+                </div>
+            </div>
+
+            <!-- 버튼 그룹 -->
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <span th:text="${isEdit} ? '수정하기' : '작성하기'"></span>
+                </button>
+                <a href="/board/list" class="btn btn-secondary btn-lg">
+                    취소
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판 - 목록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .container-main {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .page-title {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        .btn-group-custom {
+            margin-bottom: 20px;
+        }
+        .pagination {
+            margin-top: 30px;
+            justify-content: center;
+        }
+        .alert-custom {
+            margin-bottom: 20px;
+        }
+        .text-muted-small {
+            font-size: 0.9rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="container-main">
+        <!-- 메시지 표시 -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show alert-custom" role="alert">
+            <strong th:text="${message}"></strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- 페이지 제목 -->
+        <div class="row">
+            <div class="col-12">
+                <h1 class="page-title">게시판</h1>
+            </div>
+        </div>
+
+        <!-- 작성 버튼 -->
+        <div class="row btn-group-custom">
+            <div class="col-12">
+                <a href="/board/write" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> 새 글 작성
+                </a>
+            </div>
+        </div>
+
+        <!-- 게시물 테이블 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 10%;">번호</th>
+                                <th style="width: 50%;">제목</th>
+                                <th style="width: 15%;">작성자</th>
+                                <th style="width: 15%;">작성일</th>
+                                <th style="width: 10%;">조회</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 게시물 목록 루프 (임시: 샘플 데이터 표시) -->
+                            <tr th:each="board : ${boardList}" th:unless="${boardList} == null">
+                                <td th:text="${board.boardId}"></td>
+                                <td>
+                                    <a th:href="@{/board/{id}(id=${board.boardId})}" th:text="${board.title}"
+                                       style="text-decoration: none; color: #0066cc;"></a>
+                                </td>
+                                <td th:text="${board.author}"></td>
+                                <td th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}"></td>
+                                <td th:text="${board.viewCount}"></td>
+                            </tr>
+                            <!-- 게시물이 없는 경우 -->
+                            <tr th:if="${boardList} == null or ${#lists.isEmpty(boardList)}">
+                                <td colspan="5" class="text-center text-muted" style="padding: 40px;">
+                                    작성된 게시물이 없습니다.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <nav aria-label="Page navigation" th:if="${pageInfo != null and pageInfo.totalPage > 1}">
+            <ul class="pagination">
+                <!-- 이전 버튼 -->
+                <li class="page-item" th:classappend="${!pageInfo.hasPrev} ? 'disabled'">
+                    <a class="page-link" th:if="${pageInfo.hasPrev}"
+                       th:href="@{/board/list(page=${pageInfo.startPage - 1})}">
+                        이전
+                    </a>
+                    <span class="page-link" th:unless="${pageInfo.hasPrev}">이전</span>
+                </li>
+
+                <!-- 페이지 번호 버튼 -->
+                <li class="page-item" th:each="pageNum : ${#numbers.sequence(pageInfo.startPage, pageInfo.endPage)}"
+                    th:classappend="${pageNum == pageInfo.pageNum} ? 'active'">
+                    <a class="page-link" th:if="${pageNum != pageInfo.pageNum}"
+                       th:href="@{/board/list(page=${pageNum})}"
+                       th:text="${pageNum}"></a>
+                    <span class="page-link" th:unless="${pageNum != pageInfo.pageNum}"
+                          th:text="${pageNum}"></span>
+                </li>
+
+                <!-- 다음 버튼 -->
+                <li class="page-item" th:classappend="${!pageInfo.hasNext} ? 'disabled'">
+                    <a class="page-link" th:if="${pageInfo.hasNext}"
+                       th:href="@{/board/list(page=${pageInfo.endPage + 1})}">
+                        다음
+                    </a>
+                    <span class="page-link" th:unless="${pageInfo.hasNext}">다음</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 페이지 정보 -->
+        <div class="row mt-4" th:if="${pageInfo != null}">
+            <div class="col-12">
+                <p class="text-center text-muted-small">
+                    전체 <strong th:text="${pageInfo.totalCount}"></strong>건 중
+                    <strong th:text="${pageInfo.pageNum}"></strong>/<strong th:text="${pageInfo.totalPage}"></strong> 페이지
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
