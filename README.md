@@ -19,30 +19,43 @@ bulletin-board/
 ├── pom.xml
 ├── README.md
 ├── .gitignore
-└── src/main/
+├── src/main/
+│   ├── java/com/example/board/
+│   │   ├── BulletinBoardApplication.java      # Spring Boot 메인 클래스
+│   │   ├── controller/
+│   │   │   ├── HomeController.java             # 메인 라우팅
+│   │   │   └── BoardController.java            # 게시판 관련 요청 처리
+│   │   ├── service/
+│   │   │   ├── BoardService.java               # 비즈니스 로직 인터페이스
+│   │   │   └── BoardServiceImpl.java            # 비즈니스 로직 구현
+│   │   ├── dao/
+│   │   │   └── BoardMapper.java                # MyBatis Mapper 인터페이스
+│   │   └── domain/
+│   │       ├── Board.java                      # 게시물 엔티티/DTO
+│   │       └── PageInfo.java                   # 페이지네이션 VO
+│   └── resources/
+│       ├── application.properties              # Spring Boot 설정
+│       ├── schema.sql                          # DB 스키마
+│       ├── data.sql                            # 샘플 데이터 (10건)
+│       ├── mapper/
+│       │   └── BoardMapper.xml                 # MyBatis SQL 매퍼
+│       └── templates/board/
+│           ├── list.html                       # 목록 페이지
+│           ├── write.html                      # 등록/수정 폼 (공용)
+│           └── view.html                       # 상세 조회 페이지
+└── src/test/
     ├── java/com/example/board/
-    │   ├── BulletinBoardApplication.java      # Spring Boot 메인 클래스
-    │   ├── controller/
-    │   │   ├── HomeController.java             # 메인 라우팅
-    │   │   └── BoardController.java            # 게시판 관련 요청 처리
     │   ├── service/
-    │   │   ├── BoardService.java               # 비즈니스 로직 인터페이스
-    │   │   └── BoardServiceImpl.java            # 비즈니스 로직 구현
-    │   ├── dao/
-    │   │   └── BoardMapper.java                # MyBatis Mapper 인터페이스
+    │   │   └── BoardServiceImplTest.java       # 서비스 계층 테스트 (10 테스트)
+    │   ├── controller/
+    │   │   └── BoardControllerTest.java        # 컨트롤러 계층 테스트 (18 테스트)
     │   └── domain/
-    │       ├── Board.java                      # 게시물 엔티티/DTO
-    │       └── PageInfo.java                   # 페이지네이션 VO
-    └── resources/
-        ├── application.properties              # Spring Boot 설정
-        ├── schema.sql                          # DB 스키마
-        ├── data.sql                            # 샘플 데이터 (10건)
-        ├── mapper/
-        │   └── BoardMapper.xml                 # MyBatis SQL 매퍼
-        └── templates/board/
-            ├── list.html                       # 목록 페이지
-            ├── write.html                      # 등록/수정 폼 (공용)
-            └── view.html                       # 상세 조회 페이지
+    │       ├── BoardValidationTest.java        # Board 도메인 검증 테스트 (18 테스트)
+    │       └── PageInfoTest.java               # PageInfo 페이지네이션 테스트 (10 테스트)
+    └── resources/templates/board/              # 테스트용 템플릿
+        ├── list.html
+        ├── view.html
+        └── write.html
 ```
 
 ## 🎯 핵심 기능
@@ -199,7 +212,77 @@ PageInfo pageInfo = PageInfo.builder()
 pageInfo.calculatePageInfo();  // offset, startPage, endPage 등 자동 계산
 ```
 
-## 🧪 테스트 시나리오
+## 🧪 테스트
+
+### 자동화된 단위 테스트 (Unit Tests)
+
+프로젝트에는 **56개의 포괄적인 테스트**가 포함되어 있습니다.
+
+#### 1. BoardServiceImplTest (10 테스트)
+서비스 계층의 비즈니스 로직 검증
+- ✅ 게시물 목록 조회 (페이지네이션)
+- ✅ null/음수 페이지 번호 처리
+- ✅ 게시물 상세 조회 (존재/미존재)
+- ✅ 게시물 생성, 수정, 삭제
+
+```bash
+mvn test -Dtest=BoardServiceImplTest
+```
+
+#### 2. BoardControllerTest (18 테스트)
+컨트롤러 계층의 HTTP 요청 처리 검증 (@WebMvcTest)
+- ✅ GET/POST 요청 처리
+- ✅ 유효성 검증 실패 케이스
+- ✅ PRG 패턴 (리다이렉트)
+- ✅ 플래시 메시지 전달
+- ✅ 존재하지 않는 리소스 처리 (404)
+
+```bash
+mvn test -Dtest=BoardControllerTest
+```
+
+#### 3. BoardValidationTest (18 테스트)
+도메인 모델의 유효성 검증 (@Valid)
+- ✅ 필수 필드 검증 (제목, 내용, 작성자)
+- ✅ 길이 제한 검증
+  - 제목: 2-200자
+  - 내용: 5자 이상
+  - 작성자: 2-50자
+- ✅ 경계값 테스트 (min/max)
+
+```bash
+mvn test -Dtest=BoardValidationTest
+```
+
+#### 4. PageInfoTest (10 테스트)
+페이지네이션 계산 로직 검증
+- ✅ offset 계산 (LIMIT 쿼리용)
+- ✅ 총 페이지 수 계산
+- ✅ 페이지 네비게이션 블록 (5개씩)
+- ✅ 이전/다음 버튼 존재 여부
+- ✅ 다양한 페이지 크기 처리
+
+```bash
+mvn test -Dtest=PageInfoTest
+```
+
+### 테스트 실행 방법
+
+```bash
+# 전체 테스트 실행
+mvn test
+
+# 특정 테스트 클래스만 실행
+mvn test -Dtest=BoardServiceImplTest
+
+# 특정 테스트 메서드만 실행
+mvn test -Dtest=BoardServiceImplTest#testCreate
+
+# 테스트 리포트 보기
+# 테스트 실행 후 target/surefire-reports 디렉토리 확인
+```
+
+### 수동 테스트 시나리오
 
 1. **게시물 작성**
    - `/board/write` 접속
@@ -238,6 +321,10 @@ pageInfo.calculatePageInfo();  // offset, startPage, endPage 등 자동 계산
 6. **유효성 검사**: Jakarta Validation (Jakarta Bean Validation)
 7. **페이지네이션**: 효율적인 대용량 데이터 처리
 8. **PRG 패턴**: 웹 애플리케이션 모범 사례
+9. **단위 테스트**: JUnit 5, Mockito를 사용한 테스트 작성
+10. **통합 테스트**: @WebMvcTest, MockMvc를 사용한 컨트롤러 테스트
+11. **유효성 검증 테스트**: Jakarta Validation API 테스트
+12. **테스트 커버리지**: 56개 테스트로 높은 코드 커버리지 달성
 
 ## 🔄 향후 확장 사항
 
@@ -248,6 +335,9 @@ pageInfo.calculatePageInfo();  // offset, startPage, endPage 등 자동 계산
 5. **권한 관리**: Spring Security를 활용한 로그인/권한 시스템
 6. **캐싱**: 조회 성능 최적화를 위한 캐시 레이어
 7. **API 문서**: Swagger/OpenAPI를 사용한 REST API 문서화
+8. **통합 테스트**: @SpringBootTest를 사용한 전체 애플리케이션 통합 테스트
+9. **성능 테스트**: JMeter/K6을 사용한 부하 테스트
+10. **CI/CD 파이프라인**: GitHub Actions/GitLab CI를 통한 자동화된 테스트 및 배포
 
 ## 📄 라이센스
 
