@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 목록</title>
+</head>
+<body>
+    <h1>게시판 목록</h1>
+    <div th:if="${boardList != null}">
+        <p th:text="'총 ' + ${pageInfo.totalCount} + '개의 게시물'"></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시물 작성/수정</title>
+</head>
+<body>
+    <h1 th:if="${isEdit}">게시물 수정</h1>
+    <h1 th:unless="${isEdit}">게시물 작성</h1>
+    <form th:action="@{/board/write}" method="post">
+        <input type="text" name="title" placeholder="제목" th:value="${board.title}">
+        <textarea name="content" placeholder="내용" th:text="${board.content}"></textarea>
+        <input type="text" name="author" placeholder="작성자" th:value="${board.author}">
+        <button type="submit">저장</button>
+    </form>
+</body>
+</html>
