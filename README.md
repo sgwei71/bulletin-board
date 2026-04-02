@@ -145,6 +145,154 @@ mvn spring-boot:run
   - Username: `sa`
   - Password: (empty)
 
+## 🐳 Docker 빌드 및 실행
+
+### 빠른 시작 (권장)
+```bash
+# 1. 이미지 빌드
+docker build -t bulletin-board:1.0.0 .
+
+# 2. 기존 컨테이너 정리 (필요시)
+docker stop bulletin-board 2>/dev/null || true
+docker rm bulletin-board 2>/dev/null || true
+
+# 3. 백그라운드 실행 (데이터 영속성 포함)
+docker run -d -p 8080:8080 \
+  -v $(pwd)/data:/app/data \
+  --name bulletin-board \
+  bulletin-board:1.0.0
+
+# 4. 로그 확인
+docker logs -f bulletin-board
+```
+
+### 각 단계 설명
+
+**1️⃣ Docker 이미지 빌드**
+```bash
+docker build -t bulletin-board:1.0.0 .
+```
+
+**2️⃣ Docker 컨테이너 실행**
+
+포그라운드 실행 (로그 확인):
+```bash
+docker run -p 8080:8080 bulletin-board:1.0.0
+```
+
+백그라운드 실행 (권장) - 데이터 영속성 포함:
+```bash
+docker run -d -p 8080:8080 \
+  -v $(pwd)/data:/app/data \
+  --name bulletin-board \
+  bulletin-board:1.0.0
+```
+
+> - `-d`: 백그라운드 실행
+> - `-p 8080:8080`: 포트 매핑
+> - `-v $(pwd)/data:/app/data`: 데이터 영속성 (재시작 후에도 데이터 유지)
+> - `--name bulletin-board`: 컨테이너 이름 지정
+
+### 데이터 영속성
+
+Docker 재시작 후에도 데이터베이스 데이터를 유지하려면 **Docker 볼륨**을 사용합니다:
+
+```bash
+# 호스트의 ./data 디렉토리를 컨테이너의 /app/data와 매핑
+docker run -d -p 8080:8080 \
+  -v $(pwd)/data:/app/data \
+  --name bulletin-board \
+  bulletin-board:1.0.0
+```
+
+**참고**: 
+- 샘플 데이터는 Docker 재시작할 때마다 초기화됩니다
+- 사용자가 작성한 데이터는 `/app/data` 볼륨에 저장되어 유지됩니다
+
+또는 명명된 볼륨 사용:
+```bash
+# 첫 실행 (볼륨 생성)
+docker run -d -p 8080:8080 \
+  -v bulletin-board-data:/app/data \
+  --name bulletin-board \
+  bulletin-board:1.0.0
+
+# 나중에 재시작 시 (같은 볼륨 사용)
+docker stop bulletin-board
+docker start bulletin-board  # 데이터 유지됨!
+```
+
+**저장된 데이터 확인:**
+```bash
+# 로컬 디렉토리 방식
+ls -la ./data/
+
+# 명명된 볼륨 방식
+docker volume ls | grep bulletin-board-data
+```
+
+> **주의**: 볼륨을 지정하지 않으면 컨테이너 삭제 시 모든 데이터가 사라집니다!
+
+### Docker 명령어 참조
+
+```bash
+# 이미지 확인
+docker images | grep bulletin-board
+
+# 실행 중인 컨테이너 확인
+docker ps
+
+# 컨테이너 중지
+docker stop <container_id>
+
+# 컨테이너 삭제
+docker rm <container_id>
+
+# 이미지 삭제
+docker rmi bulletin-board:1.0.0
+
+# 컨테이너 로그 보기
+docker logs <container_id>
+
+# 실행 중인 컨테이너 진입
+docker exec -it <container_id> /bin/sh
+```
+
+### Docker Compose 사용 (선택 사항)
+`docker-compose.yml` 파일을 생성하여 더 편리하게 관리할 수 있습니다:
+
+```yaml
+version: '3.8'
+
+services:
+  bulletin-board:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    container_name: bulletin-board-app
+    volumes:
+      - bulletin-board-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  bulletin-board-data:
+    driver: local
+```
+
+실행:
+```bash
+# 백그라운드에서 실행
+docker-compose up -d
+
+# 중지
+docker-compose down
+
+# 로그 확인
+docker-compose logs -f
+```
+
 ## 📝 주요 코드 예시
 
 ### 1. Service 트랜잭션 관리
