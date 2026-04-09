@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bulletin-board-config
+  namespace: edu
+data:
+  application.properties: |
+    spring.application.name=bulletin-board
+    spring.h2.console.enabled=true
+    spring.h2.console.path=/h2-console
+    mybatis.mapper-locations=classpath:mapper/**/*.xml
+    logging.level.root=INFO
+    logging.level.com.example.board=DEBUG
