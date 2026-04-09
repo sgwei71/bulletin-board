@@ -75,10 +75,7 @@ jobs:
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
-        # kubeconfig 검증
-        kubectl config view
         kubectl cluster-info
-        kubectl auth can-i get pods --all-namespaces
 
     - name: Update Docker image in deployment
       run: |
