@@ -16,7 +16,7 @@ spec:
         app: bulletin-board
     spec:
       nodeSelector:
-        ncloud.com/nks-nodepool: app-pool
+        ncloud.com/nks-nodepool: system-pool
       containers:
       - name: bulletin-board
         image: sgwei71/bulletin-board:latest
